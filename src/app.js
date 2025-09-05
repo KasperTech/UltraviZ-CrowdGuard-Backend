@@ -43,8 +43,10 @@ io.on('connection', (socket) => {
     console.log(`Socket ${socket.id} joined room: ${entranceId}`);
   });
 
+
   socket.on('alert', (data) => {
-    console.log(JSON.stringify(data));
+    io.emit('newAlert', JSON.stringify(data));
+
   });
 
   socket.on('disconnect', () => {
