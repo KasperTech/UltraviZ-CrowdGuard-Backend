@@ -20,10 +20,8 @@ const cameraSchema = new mongoose.Schema({
     type: String,
   },
   roi: {
-    x: { type: Number, },
-    y: { type: Number, },
-    width: { type: Number,},
-    height: { type: Number }
+    L1: { type: Number, },
+    L2: { type: Number, },
   },
   isActive: {
     type: Boolean,
