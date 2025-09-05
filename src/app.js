@@ -36,13 +36,17 @@ app.use("/api/v1", indexRoutes);
 // Socket.IO connection handling
 io.on('connection', (socket) => {
   console.log('User connected:', socket.id);
-  
+
   // Handle joining specific entrance rooms
   socket.on('join-entrance', (entranceId) => {
     socket.join(entranceId);
     console.log(`Socket ${socket.id} joined room: ${entranceId}`);
   });
-  
+
+  socket.on('alert', (data) => {
+    console.log(JSON.stringify(data));
+  });
+
   socket.on('disconnect', () => {
     console.log('User disconnected:', socket.id);
   });
@@ -52,5 +56,5 @@ app.use(errorHandler);
 
 module.exports = {
   httpServer,
-  io 
+  io
 };
