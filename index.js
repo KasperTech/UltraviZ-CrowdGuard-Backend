@@ -1,6 +1,7 @@
 const dotenv = require('dotenv')
 const app = require('./src/app.js')
 const connectToDb = require('./src/db/connectToDb.js')
+const { httpServer } = require('./src/app.js')
 
 
 dotenv.config({
@@ -8,18 +9,19 @@ dotenv.config({
 });
 
 
-const port = process.env.PORT;
+const port = process.env.PORT || 5050;
 
-connectToDb()
-  .then(() => {
-    app.on("error", () => {
-      console.log("Server Error: ", error);
-      process.exit(1);
-    });
-    app.listen(port, () => {
-      console.log(`Server started on port: ${port}`);
-    });
-  })
-  .catch((error) => {
-    console.log("MongoDB failed to connect ", error);
-  });
+connectToDb();
+
+httpServer.listen(port, () => {
+  console.log(
+    `Server is started on port :${port} in ${
+      process.env.NODE_ENV
+    } mode at ${new Date().toLocaleDateString("en-IN", {
+      timeZone: "Asia/Kolkata",
+    })} ${new Date().toLocaleTimeString("en-IN", {
+      timeZone: "Asia/Kolkata",
+      hour12: false,
+    })}`
+  );
+});
