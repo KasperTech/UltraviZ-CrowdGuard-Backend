@@ -3,6 +3,8 @@ const asyncHandler = require('../../middlewares/asyncHandler');
 const ApiError = require('../../utils/apiError');
 const ApiResponse = require('../../utils/apiResponse');
 const { ObjectId } = require('mongoose');
+const axios = require('axios');
+
 
 /**
  *
@@ -245,3 +247,50 @@ exports.restoreCamera = asyncHandler(async (req, res) => {
 
 });
 
+
+
+exports.startCamera = asyncHandler(async (req, res) => {
+    const { cameraId } = req.params;
+    const camera = await Camera.findById(cameraId);
+    if (!camera) {
+        return res.status(400).json(new ApiError(400, 'Camera not found'));
+    }
+
+    console.log(`Starting camera with ID: ${cameraId} and Stream URL: ${camera.streamUrl}`);
+    axios.post(`http://localhost:5000/api/camera/start`, {
+        stream_url: camera.streamUrl,
+        camera_id: cameraId,
+        l1: camera.roi.L1,
+        l2: camera.roi.L2,
+        threshold: camera.threshold
+    })
+        .then(response => {
+            res.status(200).json(new ApiResponse(200, null, 'Camera start signal sent successfully'));
+        })
+        .catch(error => {
+            throw new ApiError(500, error.message, 'Error starting camera');
+        });
+
+
+});
+
+
+exports.stopCamera = asyncHandler(async (req, res) => {
+    const { cameraId } = req.params;
+    const camera = await Camera.findById(cameraId);
+    if (!camera) {
+        return res.status(400).json(new ApiError(400, 'Camera not found'));
+    }
+
+    axios.post(`http://localhost:5000/api/camera/stop`, {
+        camera_id: cameraId,
+    })
+        .then(response => {
+            res.status(200).json(new ApiResponse(200, null, 'Camera stop signal sent successfully'));
+        })
+        .catch(error => {
+            throw new ApiError(500, error.message, 'Error stopping camera');
+        });
+
+
+});
