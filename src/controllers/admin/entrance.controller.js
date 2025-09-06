@@ -10,11 +10,10 @@ const ApiResponse = require('../../utils/apiResponse');
  * @returns success on registering entrance
  */
 exports.registerEntrance = asyncHandler(async (req, res) => {
-    const { name, description, threshold, isActive } = req.body; 
+    const { name, description, isActive } = req.body; 
     const entrance = new Entrance({
         name,
         description,
-        threshold,
         isActive,
     });
     await entrance.save();
@@ -29,7 +28,7 @@ exports.registerEntrance = asyncHandler(async (req, res) => {
  */
 exports.updateEntrance = asyncHandler(async (req, res) => {
     const { entranceId } = req.params;
-    const { name, description, threshold, isActive } = req.body;
+    const { name, description, isActive } = req.body;
     const entrance = await Entrance.findById(entranceId);
     if (!entrance) {
         return res.status(400).json(new ApiError(400, 'Entrance not found'));
@@ -37,7 +36,6 @@ exports.updateEntrance = asyncHandler(async (req, res) => {
 
     entrance.name = name;
     entrance.description = description;
-    entrance.threshold = threshold; 
     entrance.isActive = isActive;
 
     await entrance.save();

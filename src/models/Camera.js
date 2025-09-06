@@ -39,7 +39,10 @@ const cameraSchema = new mongoose.Schema({
         type: String,
       }
     }
-  }
+  },
+  threshold: {
+    type: Number,
+  },
 }, {
   timestamps: true
 });

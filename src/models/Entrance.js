@@ -12,9 +12,6 @@ const entranceSchema = new mongoose.Schema({
     type: String,
     maxlength: 200
   },
-  threshold: {
-    type: Number,
-  },
   isActive: {
     type: Boolean,
     default: true

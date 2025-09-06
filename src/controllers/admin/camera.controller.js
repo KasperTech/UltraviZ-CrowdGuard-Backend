@@ -11,7 +11,7 @@ const { ObjectId } = require('mongoose');
  * @returns success on registering camera
  */
 exports.registerCamera = asyncHandler(async (req, res) => {
-    const { entranceId, deviceId, name, streamUrl, roi, isActive, ipAddress, location } = req.body;
+    const { entranceId, deviceId, name, streamUrl, roi, isActive, ipAddress, location, threshold } = req.body;
     const camera = new Camera({
         entranceId,
         deviceId,
@@ -20,7 +20,8 @@ exports.registerCamera = asyncHandler(async (req, res) => {
         roi,
         isActive,
         ipAddress,
-        location
+        location,
+        threshold
     });
     await camera.save();
     res.status(200).json(new ApiResponse(200, camera, 'Camera registered successfully'));
@@ -34,7 +35,7 @@ exports.registerCamera = asyncHandler(async (req, res) => {
  */
 exports.updateCamera = asyncHandler(async (req, res) => {
     const { cameraId } = req.params;
-    const { entranceId, deviceId, name, streamUrl, roi, isActive, ipAddress, location } = req.body;
+    const { entranceId, deviceId, name, streamUrl, roi, isActive, ipAddress, location, threshold } = req.body;
     const camera = await Camera.findById(cameraId);
     if (!camera) {
         return res.status(400).json(new ApiError(400, 'Camera not found'));
@@ -47,6 +48,8 @@ exports.updateCamera = asyncHandler(async (req, res) => {
     camera.roi = roi;
     camera.isActive = isActive;
     camera.ipAddress = ipAddress;
+    camera.threshold = threshold;
+    camera.location = location;
 
     await camera.save();
     res.status(200).json(new ApiResponse(200, camera, 'Camera updated successfully'));
@@ -162,6 +165,7 @@ exports.getAllCameras = asyncHandler(async (req, res) => {
                                 isActive: 1,
                                 ipAddress: 1,
                                 location: 1,
+                                threshold: 1,
                                 createdAt: 1,
                                 updatedAt: 1,
                                 entrance: {
