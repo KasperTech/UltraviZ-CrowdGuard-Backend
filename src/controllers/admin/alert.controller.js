@@ -23,10 +23,21 @@ exports.registerAlert = asyncHandler(async (req, res) => {
 
     await alert.save();
 
-    // Emit Socket.IO event to the specific entrance room
+    // Emit Socket.IO event to the specific entrance room AND to a global channel
     const io = req.app.get('io');
     if (io) {
+        // Emit to the specific entrance (for entrance-specific components)
         io.to(entranceId.toString()).emit('newAlert', {
+            _id: alert._id,
+            title: alert.title,
+            message: alert.message,
+            severity: alert.severity,
+            createdAt: alert.createdAt,
+            entranceId: alert.entranceId
+        });
+
+        // ALSO emit to a global channel for admin users
+        io.emit('globalAlert', {
             _id: alert._id,
             title: alert.title,
             message: alert.message,
@@ -90,7 +101,7 @@ exports.deleteAlert = asyncHandler(async (req, res) => {
  */
 exports.getAllAlerts = asyncHandler(async (req, res) => {
     try {
-        const { page, limit, entranceId, isDeleted, isResolved } = req.query;
+        const { page, limit, entranceId, isDeleted, isResolved, isRead } = req.query;
 
         // Build query object
         const query = {};
@@ -108,6 +119,10 @@ exports.getAllAlerts = asyncHandler(async (req, res) => {
             query.isDeleted = true;
         } else {
             query["$or"] = [{ isDeleted: false }, { isDeleted: { $exists: false } }];
+        }
+
+        if (isRead) {
+            query.isRead = isRead === true;
         }
 
         // Parse pagination parameters with defaults
@@ -145,6 +160,7 @@ exports.getAllAlerts = asyncHandler(async (req, res) => {
                                 severity: 1,
                                 isResolved: 1,
                                 resolvedAt: 1,
+                                isRead: 1,
                                 createdAt: 1,
                                 updatedAt: 1,
                                 entrance: {
@@ -229,15 +245,8 @@ exports.restoreAlert = asyncHandler(async (req, res) => {
  * @returns confirmation of updated alerts
  */
 exports.markAllAlertsAsRead = asyncHandler(async (req, res) => {
-    const { entranceId } = req.body;
-
-    if (!entranceId) {
-        return res.status(400).json(new ApiError(400, 'Entrance ID is required'));
-    }
-
     const result = await Alert.updateMany(
         {
-            entranceId,
             isRead: false,
             $or: [{ isDeleted: false }, { isDeleted: { $exists: false } }]
         },
