@@ -262,7 +262,8 @@ exports.startCamera = asyncHandler(async (req, res) => {
         camera_id: cameraId,
         l1: camera.roi.L1,
         l2: camera.roi.L2,
-        threshold: camera.threshold
+        threshold: camera.threshold,
+        camera_name: camera.name
     })
         .then(response => {
             res.status(200).json(new ApiResponse(200, null, 'Camera start signal sent successfully'));

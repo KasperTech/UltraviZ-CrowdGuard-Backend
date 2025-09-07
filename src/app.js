@@ -37,15 +37,14 @@ app.use("/api/v1", indexRoutes);
 io.on('connection', (socket) => {
   console.log('User connected:', socket.id);
 
-  // Handle joining specific entrance rooms
-  socket.on('join-entrance', (entranceId) => {
-    socket.join(entranceId);
-    console.log(`Socket ${socket.id} joined room: ${entranceId}`);
-  });
-
-
+ 
   socket.on('alert', (data) => {
     io.emit('newAlert', JSON.stringify(data));
+
+  });
+
+    socket.on('count', (data) => {
+    io.emit('countUpdate', JSON.stringify(data));
 
   });
 
