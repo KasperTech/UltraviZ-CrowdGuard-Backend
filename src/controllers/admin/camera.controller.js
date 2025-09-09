@@ -3,6 +3,8 @@ const asyncHandler = require('../../middlewares/asyncHandler');
 const ApiError = require('../../utils/apiError');
 const ApiResponse = require('../../utils/apiResponse');
 const { ObjectId } = require('mongoose');
+const axios = require('axios');
+
 
 /**
  *
@@ -11,7 +13,7 @@ const { ObjectId } = require('mongoose');
  * @returns success on registering camera
  */
 exports.registerCamera = asyncHandler(async (req, res) => {
-    const { entranceId, deviceId, name, streamUrl, roi, isActive, ipAddress, location } = req.body;
+    const { entranceId, deviceId, name, streamUrl, roi, isActive, ipAddress, location, threshold } = req.body;
     const camera = new Camera({
         entranceId,
         deviceId,
@@ -20,7 +22,8 @@ exports.registerCamera = asyncHandler(async (req, res) => {
         roi,
         isActive,
         ipAddress,
-        location
+        location,
+        threshold
     });
     await camera.save();
     res.status(200).json(new ApiResponse(200, camera, 'Camera registered successfully'));
@@ -34,7 +37,7 @@ exports.registerCamera = asyncHandler(async (req, res) => {
  */
 exports.updateCamera = asyncHandler(async (req, res) => {
     const { cameraId } = req.params;
-    const { entranceId, deviceId, name, streamUrl, roi, isActive, ipAddress, location } = req.body;
+    const { entranceId, deviceId, name, streamUrl, roi, isActive, ipAddress, location, threshold } = req.body;
     const camera = await Camera.findById(cameraId);
     if (!camera) {
         return res.status(400).json(new ApiError(400, 'Camera not found'));
@@ -47,6 +50,8 @@ exports.updateCamera = asyncHandler(async (req, res) => {
     camera.roi = roi;
     camera.isActive = isActive;
     camera.ipAddress = ipAddress;
+    camera.threshold = threshold;
+    camera.location = location;
 
     await camera.save();
     res.status(200).json(new ApiResponse(200, camera, 'Camera updated successfully'));
@@ -162,6 +167,7 @@ exports.getAllCameras = asyncHandler(async (req, res) => {
                                 isActive: 1,
                                 ipAddress: 1,
                                 location: 1,
+                                threshold: 1,
                                 createdAt: 1,
                                 updatedAt: 1,
                                 entrance: {
@@ -241,3 +247,51 @@ exports.restoreCamera = asyncHandler(async (req, res) => {
 
 });
 
+
+
+exports.startCamera = asyncHandler(async (req, res) => {
+    const { cameraId } = req.params;
+    const camera = await Camera.findById(cameraId);
+    if (!camera) {
+        return res.status(400).json(new ApiError(400, 'Camera not found'));
+    }
+
+    console.log(`Starting camera with ID: ${cameraId} and Stream URL: ${camera.streamUrl}`);
+    axios.post(`http://localhost:5000/api/camera/start`, {
+        stream_url: camera.streamUrl,
+        camera_id: cameraId,
+        l1: camera.roi.L1,
+        l2: camera.roi.L2,
+        threshold: camera.threshold,
+        camera_name: camera.name
+    })
+        .then(response => {
+            res.status(200).json(new ApiResponse(200, null, 'Camera start signal sent successfully'));
+        })
+        .catch(error => {
+            throw new ApiError(500, error.message, 'Error starting camera');
+        });
+
+
+});
+
+
+exports.stopCamera = asyncHandler(async (req, res) => {
+    const { cameraId } = req.params;
+    const camera = await Camera.findById(cameraId);
+    if (!camera) {
+        return res.status(400).json(new ApiError(400, 'Camera not found'));
+    }
+
+    axios.post(`http://localhost:5000/api/camera/stop`, {
+        camera_id: cameraId,
+    })
+        .then(response => {
+            res.status(200).json(new ApiResponse(200, null, 'Camera stop signal sent successfully'));
+        })
+        .catch(error => {
+            throw new ApiError(500, error.message, 'Error stopping camera');
+        });
+
+
+});

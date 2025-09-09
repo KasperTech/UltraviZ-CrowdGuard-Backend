@@ -20,8 +20,8 @@ router
     .put(userAuth, alertController.restoreAlert);
 
 router
-    .route('/:entranceId/mark-all-as-read')
-    .put(userAuth, alertController.markAllAlertsAsRead);
+    .route('/mark-all-as-read')
+    .post(userAuth, alertController.markAllAlertsAsRead);
 
 router
     .route('/:entranceId/unread')

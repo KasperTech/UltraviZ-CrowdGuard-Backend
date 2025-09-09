@@ -19,4 +19,7 @@ router
     .route('/:cameraId/restore')
     .put(userAuth, cameraController.restoreCamera);
 
+router.route('/:cameraId/start').post(userAuth, cameraController.startCamera);
+router.route('/:cameraId/stop').post(userAuth, cameraController.stopCamera);
+
 module.exports = router;
