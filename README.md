@@ -1,9 +1,9 @@
-# UltraviZ CrowdGuard Frontend
+# UltraviZ CrowdGuard Backend
 
 
 ## Overview
 
-This repository contains the codebase for frontend structure of UltraviZ CrowdGuard
+This repository contains the codebase for backend structure of UltraviZ CrowdGuard
 
 ## Getting Started
 
